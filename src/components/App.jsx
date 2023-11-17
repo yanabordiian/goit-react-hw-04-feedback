@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import Section from './Section/Section';
 import FeedbackOptions from './FeedbackOptions/FeedbackOptions';
 import ListStatistics from './ListStatistics/ListStatistics';
@@ -6,57 +6,60 @@ import Notification from './Notification/Notification';
 import css from './App.module.css';
 
 
-export class App extends Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0
-  };
- 
+export  function App() {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
-clickOnButton = option => {this.setState((prevState) => {
-  return {
-    [option]: prevState[option] + 1,
-  };
-}); }
+
+  const clickOnButton = option => {
+    switch (option) {
+      case 'good':
+        setGood(prevState => prevState + 1);
+        break;
+      case 'neutral':
+        setNeutral(prevState => prevState + 1);
+        break;
+      case 'bad':
+        setBad(prevState => prevState + 1);
+        break;
+      default: console.error("error case option")
+  }
+}
   
-countTotalFeedback = () => {return this.state.good + this.state.neutral + this.state.bad};
-countPositiveFeedbackPercentage = () => {
-const result = Math.ceil(((this.state.good - this.state.bad + this.state.neutral) / this.countTotalFeedback()) * 100).toFixed(0)
+const countTotalFeedback = () => {return good + neutral + bad};
+
+  const countPositiveFeedbackPercentage = () => {
+const result = Math.ceil(((good - bad + neutral) / countTotalFeedback()) * 100).toFixed(0)
 if (result < 0) { return 0 };
 return result;
 };
 
   
-onLeaveFeedback = e => {
+const onLeaveFeedback = e => {
   const option = e.target.textContent;
-  this.clickOnButton(option)
+  clickOnButton(option)
 };
 
-  render() {
-    
-    const state = this.state;
-
-    return ( 
+  return ( 
       <div className={css.app}>
         <Section title={'Please leave feedback'}>
           <FeedbackOptions
-            options={Object.keys(state)}
-            onLeaveFeedback={this.onLeaveFeedback}
+            options={{good, neutral, bad}}
+            onLeaveFeedback={onLeaveFeedback}
             />
         </Section>
         <Section  title={'Statistics'}>
-          {this.countTotalFeedback() > 0 ?(
+          {countTotalFeedback() > 0 ?(
             <ListStatistics
-            good={this.state.good}
-            neutral={this.state.neutral}
-            bad={this.state.bad}
-            positivePercentage={this.countPositiveFeedbackPercentage()}
-            total={this.countTotalFeedback()}
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            positivePercentage={countPositiveFeedbackPercentage()}
+            total={countTotalFeedback()}
             />
           ): (<Notification message="There is no feedback"/>)}
         </Section>
       </div>
     )
-  }
 }
